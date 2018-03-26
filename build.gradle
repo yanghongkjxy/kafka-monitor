@@ -4,33 +4,29 @@ allprojects {
   apply plugin: 'java'
   apply plugin: 'checkstyle'
 
+  version = "1.0.0"
+
   sourceCompatibility = 1.7
 
   repositories {
     mavenCentral()
   }
 
-  checkstyle {
-    configFile = new File(rootDir, "checkstyle/checkstyle.xml")
-  }
-  test.dependsOn('checkstyleMain', 'checkstyleTest')
-}
-
-project(':services') {
   dependencies {
     compile 'net.sourceforge.argparse4j:argparse4j:0.5.0'
     compile 'org.slf4j:slf4j-log4j12:1.7.6'
     compile 'org.apache.avro:avro:1.4.0'
-    compile 'org.apache.kafka:kafka_2.11:0.9.0.1'
-    compile 'org.apache.kafka:kafka-clients:0.9.0.1'
+    compile 'org.apache.kafka:kafka_2.11:0.11.0.1'
+    compile 'org.apache.kafka:kafka-clients:0.11.0.1'
     compile 'org.testng:testng:6.8.8'
     compile 'org.eclipse.jetty:jetty-server:8.1.19.v20160209'
     compile 'org.json:json:20140107'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.7.1'
-    compile 'junit:junit:4.6'
     compile 'org.jolokia:jolokia-jvm:1.3.3'
+    compile 'net.savantly:graphite-client:1.1.0-RELEASE'
+    compile 'com.timgroup:java-statsd-client:3.0.1'
 
-    testCompile 'junit:junit:4.6'
+    testCompile 'org.testng:testng:6.8.8'
   }
 
   tasks.create(name: "copyDependantLibs", type: Copy) {
@@ -52,27 +48,23 @@ project(':services') {
     from sourceSets.test.output
   }
 
-  test {
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-  }
-
   artifacts {
     archives testJar
   }
-}
 
-project(':tests') {
-  dependencies {
-    compile project(':services')
+  checkstyle {
+    configFile = new File(rootDir, "checkstyle/checkstyle.xml")
   }
-}
 
-project(':core') {
-  dependencies {
-    compile project(':tests')
+  test.dependsOn('checkstyleMain', 'checkstyleTest')
+
+  test {
+    useTestNG()
+
+    testLogging {
+      events "passed", "skipped", "failed"
+      exceptionFormat = 'full'
+    }
   }
 }
 
